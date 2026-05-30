@@ -35,7 +35,7 @@ const steps = [
   { icon: Truck, title: 'Pickup or delivery', description: 'Collect from our Accra shop or get it delivered to you.' },
 ]
 
-export default function HomePage() {
+export function HomePageContent() {
   return (
     <>
       <section className="bg-tscolors-navy px-4 py-16 text-white sm:py-24">
