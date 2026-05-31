@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PRINT_SERVICES, PRINT_SIZES, PRINT_FINISHES } from '@/constants'
-import { createClient } from '@/lib/supabase/client'
+import { submitPrintRequest } from '@/lib/supabase/requests'
 import { isValidGhanaPhone, normalizePhone } from '@/lib/utils'
 
 const STEPS = ['Service Details', 'Artwork', 'Contact Details']
@@ -65,29 +65,23 @@ export default function PrintRequestPage() {
     setSubmitting(true)
     setErrors({})
 
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('print_requests')
-      .insert({
-        customer_name: name.trim(),
-        customer_phone: normalizePhone(phone),
-        service_type: serviceType,
-        quantity: Number(quantity),
-        size,
-        finish,
-        status: 'pending',
-      })
-      .select('order_number')
-      .maybeSingle()
+    const { orderNumber, error } = await submitPrintRequest({
+      customer_name: name.trim(),
+      customer_phone: normalizePhone(phone),
+      service_type: serviceType,
+      quantity: Number(quantity),
+      size,
+      finish,
+    })
 
     setSubmitting(false)
 
-    if (error || !data) {
-      setErrors({ submit: 'Failed to submit request. Please try again.' })
+    if (error || !orderNumber) {
+      setErrors({ submit: error ?? 'Failed to submit request. Please try again.' })
       return
     }
 
-    setRefNumber(data.order_number)
+    setRefNumber(orderNumber)
     setSubmitted(true)
   }
 

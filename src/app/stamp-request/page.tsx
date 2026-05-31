@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { STAMP_TYPES, STAMP_SIZES, STAMP_COLORS } from '@/constants'
-import { createClient } from '@/lib/supabase/client'
+import { submitStampRequest } from '@/lib/supabase/requests'
 import { isValidGhanaPhone, normalizePhone } from '@/lib/utils'
 
 const STEPS = ['Stamp Details', 'Logo & Design', 'Contact Details']
@@ -65,29 +65,23 @@ export default function StampRequestPage() {
     setSubmitting(true)
     setErrors({})
 
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('stamp_requests')
-      .insert({
-        customer_name: name.trim(),
-        customer_phone: normalizePhone(phone),
-        stamp_type: stampType,
-        stamp_text: stampText.trim(),
-        size,
-        ink_color: inkColor,
-        status: 'pending',
-      })
-      .select('order_number')
-      .maybeSingle()
+    const { orderNumber, error } = await submitStampRequest({
+      customer_name: name.trim(),
+      customer_phone: normalizePhone(phone),
+      stamp_type: stampType,
+      stamp_text: stampText.trim(),
+      size,
+      ink_color: inkColor,
+    })
 
     setSubmitting(false)
 
-    if (error || !data) {
-      setErrors({ submit: 'Failed to submit request. Please try again.' })
+    if (error || !orderNumber) {
+      setErrors({ submit: error ?? 'Failed to submit request. Please try again.' })
       return
     }
 
-    setRefNumber(data.order_number)
+    setRefNumber(orderNumber)
     setSubmitted(true)
   }
 
