@@ -72,7 +72,7 @@ export default function OrderPage() {
         total_amount: totalAmount,
         notes: notes.trim() || null,
       })
-      .select('order_number')
+      .select('id, order_number')
       .maybeSingle()
 
     if (orderError || !order) {
