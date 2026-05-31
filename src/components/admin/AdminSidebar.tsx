@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -11,9 +11,11 @@ import {
   LogOut,
   Menu,
   X,
+  Store,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 const links = [
@@ -26,7 +28,17 @@ const links = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/admin/login')
+    router.refresh()
+  }
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
@@ -63,7 +75,7 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="border-t border-tscolors-navy-light p-4">
+      <div className="space-y-1 border-t border-tscolors-navy-light p-4">
         <Link
           href="/"
           className={cn(
@@ -71,9 +83,18 @@ export function AdminSidebar() {
             'w-full justify-start gap-2 text-white/70 hover:bg-tscolors-navy-light hover:text-white'
           )}
         >
-          <LogOut className="h-4 w-4" />
+          <Store className="h-4 w-4" />
           Back to Shop
         </Link>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2 text-white/70 hover:bg-tscolors-navy-light hover:text-white"
+          onClick={handleLogout}
+          disabled={loggingOut}
+        >
+          <LogOut className="h-4 w-4" />
+          {loggingOut ? 'Signing out...' : 'Sign out'}
+        </Button>
       </div>
     </div>
   )
