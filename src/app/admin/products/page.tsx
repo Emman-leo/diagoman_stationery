@@ -29,11 +29,38 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [addOpen, setAddOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [newName, setNewName] = useState('')
   const [newCategoryId, setNewCategoryId] = useState('')
   const [newPrice, setNewPrice] = useState('')
   const [newStock, setNewStock] = useState('')
+  const [newActive, setNewActive] = useState(true)
   const [saving, setSaving] = useState(false)
+
+  const resetForm = () => {
+    setNewName('')
+    setNewCategoryId('')
+    setNewPrice('')
+    setNewStock('')
+    setNewActive(true)
+    setEditingProduct(null)
+  }
+
+  const openAdd = () => {
+    resetForm()
+    setAddOpen(true)
+  }
+
+  const openEdit = (product: Product) => {
+    setEditingProduct(product)
+    setNewName(product.name)
+    setNewCategoryId(product.category_id)
+    setNewPrice(product.price.toString())
+    setNewStock(product.stock_quantity.toString())
+    setNewActive(product.is_active)
+    setEditOpen(true)
+  }
 
   const load = useCallback(async () => {
     const supabase = createClient()
@@ -68,10 +95,29 @@ export default function AdminProductsPage() {
     setSaving(false)
     if (!error) {
       setAddOpen(false)
-      setNewName('')
-      setNewCategoryId('')
-      setNewPrice('')
-      setNewStock('')
+      resetForm()
+      load()
+    }
+  }
+
+  const handleUpdateProduct = async () => {
+    if (!editingProduct || !newName.trim() || !newCategoryId) return
+    setSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('products')
+      .update({
+        name: newName.trim(),
+        category_id: newCategoryId,
+        price: Number(newPrice) || 0,
+        stock_quantity: Number(newStock) || 0,
+        is_active: newActive,
+      })
+      .eq('id', editingProduct.id)
+    setSaving(false)
+    if (!error) {
+      setEditOpen(false)
+      resetForm()
       load()
     }
   }
@@ -91,7 +137,7 @@ export default function AdminProductsPage() {
         </div>
         <Button
           className="bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light"
-          onClick={() => setAddOpen(true)}
+          onClick={openAdd}
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Product
@@ -136,7 +182,12 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon-xs" aria-label="Edit">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label="Edit"
+                      onClick={() => openEdit(product)}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
@@ -156,7 +207,7 @@ export default function AdminProductsPage() {
         </table>
       </div>
 
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+      <Dialog open={addOpen} onOpenChange={open => { setAddOpen(open); if (!open) resetForm() }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-tscolors-navy">Add Product</DialogTitle>
@@ -215,6 +266,85 @@ export default function AdminProductsPage() {
               disabled={saving}
             >
               {saving ? 'Saving...' : 'Save Product'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={open => { setEditOpen(open); if (!open) resetForm() }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-tscolors-navy">Edit Product</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Product name</Label>
+              <Input
+                className="mt-1"
+                placeholder="Product name"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select value={newCategoryId} onValueChange={v => setNewCategoryId(v ?? '')}>
+                <SelectTrigger className="mt-1 w-full">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Price (GH₵)</Label>
+                <Input
+                  className="mt-1"
+                  type="number"
+                  placeholder="0.00"
+                  value={newPrice}
+                  onChange={e => setNewPrice(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Stock quantity</Label>
+                <Input
+                  className="mt-1"
+                  type="number"
+                  placeholder="0"
+                  value={newStock}
+                  onChange={e => setNewStock(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={newActive ? 'active' : 'inactive'}
+                onValueChange={v => setNewActive(v === 'active')}
+              >
+                <SelectTrigger className="mt-1 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button
+              className="bg-tscolors-navy hover:bg-tscolors-navy-light"
+              onClick={handleUpdateProduct}
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </DialogContent>
