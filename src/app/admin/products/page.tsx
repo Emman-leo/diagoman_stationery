@@ -20,7 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ImageUpload } from '@/components/admin/ImageUpload'
 import { createClient } from '@/lib/supabase/client'
+import { deleteProductImage } from '@/lib/supabase/storage'
 import { mapCategory, mapProduct } from '@/lib/supabase/mappers'
 import { formatCurrency, getCategoryName } from '@/lib/utils'
 import { Category, Product } from '@/types'
@@ -36,6 +38,7 @@ export default function AdminProductsPage() {
   const [newPrice, setNewPrice] = useState('')
   const [newStock, setNewStock] = useState('')
   const [newActive, setNewActive] = useState(true)
+  const [newImageUrl, setNewImageUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   const resetForm = () => {
@@ -44,6 +47,7 @@ export default function AdminProductsPage() {
     setNewPrice('')
     setNewStock('')
     setNewActive(true)
+    setNewImageUrl(null)
     setEditingProduct(null)
   }
 
@@ -59,6 +63,7 @@ export default function AdminProductsPage() {
     setNewPrice(product.price.toString())
     setNewStock(product.stock_quantity.toString())
     setNewActive(product.is_active)
+    setNewImageUrl(product.image_url)
     setEditOpen(true)
   }
 
@@ -91,6 +96,7 @@ export default function AdminProductsPage() {
       low_stock_threshold: 10,
       has_fixed_price: true,
       is_active: true,
+      image_url: newImageUrl,
     })
     setSaving(false)
     if (!error) {
@@ -104,6 +110,11 @@ export default function AdminProductsPage() {
     if (!editingProduct || !newName.trim() || !newCategoryId) return
     setSaving(true)
     const supabase = createClient()
+
+    if (!newImageUrl && editingProduct.image_url) {
+      await deleteProductImage(editingProduct.image_url)
+    }
+
     const { error } = await supabase
       .from('products')
       .update({
@@ -112,6 +123,7 @@ export default function AdminProductsPage() {
         price: Number(newPrice) || 0,
         stock_quantity: Number(newStock) || 0,
         is_active: newActive,
+        image_url: newImageUrl,
       })
       .eq('id', editingProduct.id)
     setSaving(false)
@@ -161,8 +173,17 @@ export default function AdminProductsPage() {
             {products.map(product => (
               <tr key={product.id} className="border-t">
                 <td className="px-4 py-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded bg-tscolors-cloud">
-                    <Package className="h-5 w-5 text-tscolors-navy/30" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded bg-tscolors-cloud overflow-hidden">
+                    {product.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Package className="h-5 w-5 text-tscolors-navy/30" />
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 font-medium">{product.name}</td>
@@ -213,6 +234,16 @@ export default function AdminProductsPage() {
             <DialogTitle className="text-tscolors-navy">Add Product</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            <div>
+              <Label>Product image</Label>
+              <div className="mt-1">
+                <ImageUpload
+                  currentUrl={newImageUrl}
+                  onUpload={url => setNewImageUrl(url)}
+                  onRemove={() => setNewImageUrl(null)}
+                />
+              </div>
+            </div>
             <div>
               <Label>Product name</Label>
               <Input
@@ -277,6 +308,16 @@ export default function AdminProductsPage() {
             <DialogTitle className="text-tscolors-navy">Edit Product</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            <div>
+              <Label>Product image</Label>
+              <div className="mt-1">
+                <ImageUpload
+                  currentUrl={newImageUrl}
+                  onUpload={url => setNewImageUrl(url)}
+                  onRemove={() => setNewImageUrl(null)}
+                />
+              </div>
+            </div>
             <div>
               <Label>Product name</Label>
               <Input

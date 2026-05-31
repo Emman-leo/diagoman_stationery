@@ -22,7 +22,7 @@ export function ProductCard({ product, categories }: Props) {
 
   return (
     <Card className="flex h-full flex-col overflow-hidden border-tscolors-navy/10 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex aspect-square items-center justify-center bg-tscolors-cloud">
+      <div className="flex aspect-square items-center justify-center bg-tscolors-cloud overflow-hidden">
         {product.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
