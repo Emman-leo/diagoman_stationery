@@ -72,8 +72,8 @@ export default function OrderPage() {
         total_amount: totalAmount,
         notes: notes.trim() || null,
       })
-      .select()
-      .single()
+      .select('order_number')
+      .maybeSingle()
 
     if (orderError || !order) {
       setErrors({ submit: 'Failed to place order. Please try again.' })

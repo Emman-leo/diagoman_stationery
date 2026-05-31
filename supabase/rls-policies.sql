@@ -133,6 +133,11 @@ on stamp_requests for select
 to authenticated
 using (true);
 
+create policy "Public can read stamp requests"
+on stamp_requests for select
+to anon, authenticated
+using (true);
+
 create policy "Admin can update stamp requests"
 on stamp_requests for update
 to authenticated
@@ -150,6 +155,11 @@ with check (true);
 create policy "Admin can read print requests"
 on print_requests for select
 to authenticated
+using (true);
+
+create policy "Public can read print requests"
+on print_requests for select
+to anon, authenticated
 using (true);
 
 create policy "Admin can update print requests"

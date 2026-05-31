@@ -41,16 +41,16 @@ export default function TrackPage() {
     setTracking(true)
     const supabase = createClient()
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('orders')
       .select('*, items:order_items(*)')
       .eq('order_number', orderNumber.trim().toUpperCase())
       .eq('customer_phone', normalizePhone(phone))
-      .single()
+      .maybeSingle()
 
     setTracking(false)
 
-    if (!data) {
+    if (error || !data) {
       setOrder(null)
       setNotFound(true)
       return

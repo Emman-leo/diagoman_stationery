@@ -77,8 +77,8 @@ export default function StampRequestPage() {
         ink_color: inkColor,
         status: 'pending',
       })
-      .select()
-      .single()
+      .select('order_number')
+      .maybeSingle()
 
     setSubmitting(false)
 

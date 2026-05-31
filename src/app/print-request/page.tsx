@@ -77,8 +77,8 @@ export default function PrintRequestPage() {
         finish,
         status: 'pending',
       })
-      .select()
-      .single()
+      .select('order_number')
+      .maybeSingle()
 
     setSubmitting(false)
 

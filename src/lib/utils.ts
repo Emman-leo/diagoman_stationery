@@ -43,12 +43,20 @@ export function generateOrderNumber(prefix: string = 'ORD'): string {
 }
 
 export function isValidGhanaPhone(phone: string): boolean {
-  const cleaned = phone.replace(/\s/g, '')
-  return /^0[235]\d{8}$/.test(cleaned)
+  const cleaned = normalizePhone(phone)
+  return /^0\d{9}$/.test(cleaned)
 }
 
 export function normalizePhone(phone: string): string {
-  return phone.replace(/\s/g, '')
+  let cleaned = phone.replace(/\s/g, '')
+  if (cleaned.startsWith('+233')) {
+    cleaned = '0' + cleaned.slice(4)
+  } else if (cleaned.startsWith('233') && cleaned.length === 12) {
+    cleaned = '0' + cleaned.slice(3)
+  } else if (/^\d{9}$/.test(cleaned)) {
+    cleaned = '0' + cleaned
+  }
+  return cleaned
 }
 
 export function getCategoryName(categoryId: string, categories: { id: string; name: string }[]): string {
