@@ -11,7 +11,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useCart } from '@/lib/hooks/useCart'
-import { formatCurrency, generateOrderNumber, isValidGhanaPhone } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { formatCurrency, isValidGhanaPhone, normalizePhone } from '@/lib/utils'
 import { DELIVERY_FEE } from '@/constants'
 import { FulfillmentType } from '@/types'
 
@@ -27,6 +28,7 @@ export default function OrderPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const deliveryFee = fulfillment === 'delivery' ? DELIVERY_FEE : 0
   const total = subtotal + deliveryFee
@@ -45,13 +47,70 @@ export default function OrderPage() {
     return Object.keys(e).length === 0
   }
 
-  const handleSubmit = (ev: React.FormEvent) => {
+  const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault()
     if (!validate()) return
-    const num = generateOrderNumber('ORD')
-    setOrderNumber(num)
+
+    setSubmitting(true)
+    setErrors({})
+
+    const supabase = createClient()
+    const normalizedPhone = normalizePhone(phone)
+    const deliveryFeeAmount = fulfillment === 'delivery' ? DELIVERY_FEE : 0
+    const totalAmount = subtotal + deliveryFeeAmount
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        customer_name: name.trim(),
+        customer_phone: normalizedPhone,
+        customer_email: email.trim() || null,
+        fulfillment_type: fulfillment,
+        status: 'pending',
+        subtotal,
+        delivery_fee: deliveryFeeAmount,
+        total_amount: totalAmount,
+        notes: notes.trim() || null,
+      })
+      .select()
+      .single()
+
+    if (orderError || !order) {
+      setErrors({ submit: 'Failed to place order. Please try again.' })
+      setSubmitting(false)
+      return
+    }
+
+    const orderItems = items.map(i => ({
+      order_id: order.id,
+      product_id: i.product.id,
+      product_name: i.product.name,
+      unit_price: i.product.price,
+      quantity: i.quantity,
+      subtotal: i.product.price * i.quantity,
+    }))
+
+    const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
+
+    if (itemsError) {
+      setErrors({ submit: 'Failed to place order. Please try again.' })
+      setSubmitting(false)
+      return
+    }
+
+    if (fulfillment === 'delivery') {
+      await supabase.from('deliveries').insert({
+        order_id: order.id,
+        address: address.trim(),
+        city: area.trim(),
+        delivery_fee: DELIVERY_FEE,
+      })
+    }
+
     clearCart()
+    setOrderNumber(order.order_number)
     setSubmitted(true)
+    setSubmitting(false)
   }
 
   if (submitted) {
@@ -266,12 +325,17 @@ export default function OrderPage() {
                 />
               </div>
 
+              {errors.submit && (
+                <p className="text-sm text-destructive">{errors.submit}</p>
+              )}
+
               <Button
                 type="submit"
+                disabled={submitting}
                 className="w-full bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light"
                 size="lg"
               >
-                Place Order
+                {submitting ? 'Placing order...' : 'Place Order'}
               </Button>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -19,8 +19,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { mockPrintRequests } from '@/data/mock'
 import { PRINT_REQUEST_STATUSES } from '@/constants'
+import { createClient } from '@/lib/supabase/client'
+import { mapPrintRequest } from '@/lib/supabase/mappers'
 import {
   formatCurrency,
   formatDateTime,
@@ -30,20 +31,52 @@ import {
 import { PrintRequest } from '@/types'
 
 export default function AdminPrintingPage() {
+  const [requests, setRequests] = useState<PrintRequest[]>([])
   const [statusFilter, setStatusFilter] = useState('all')
   const [selected, setSelected] = useState<PrintRequest | null>(null)
   const [quotePrice, setQuotePrice] = useState('')
   const [quoteNotes, setQuoteNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('print_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setRequests((data ?? []).map(row => mapPrintRequest(row as Record<string, unknown>)))
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   const filtered = useMemo(() => {
-    if (statusFilter === 'all') return mockPrintRequests
-    return mockPrintRequests.filter(r => r.status === statusFilter)
-  }, [statusFilter])
+    if (statusFilter === 'all') return requests
+    return requests.filter(r => r.status === statusFilter)
+  }, [statusFilter, requests])
 
   const openRequest = (req: PrintRequest) => {
     setSelected(req)
     setQuotePrice(req.quoted_price?.toString() ?? '')
     setQuoteNotes(req.admin_notes ?? '')
+  }
+
+  const handleSaveQuote = async (id: string, price: number, notes: string) => {
+    const supabase = createClient()
+    await supabase
+      .from('print_requests')
+      .update({ quoted_price: price, admin_notes: notes, status: 'quoted' })
+      .eq('id', id)
+  }
+
+  const handleSave = async () => {
+    if (!selected) return
+    setSaving(true)
+    await handleSaveQuote(selected.id, Number(quotePrice), quoteNotes)
+    await load()
+    setSelected(null)
+    setSaving(false)
   }
 
   return (
@@ -158,8 +191,12 @@ export default function AdminPrintingPage() {
                       placeholder="Artwork notes, turnaround..."
                     />
                   </div>
-                  <Button className="w-full bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light">
-                    Save Quote
+                  <Button
+                    className="w-full bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save Quote'}
                   </Button>
                 </div>
               </div>

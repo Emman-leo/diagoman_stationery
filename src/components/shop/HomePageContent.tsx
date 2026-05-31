@@ -4,9 +4,12 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProductCard } from '@/components/shop/ProductCard'
-import { mockProducts, mockCategories } from '@/data/mock'
+import { Category, Product } from '@/types'
 
-const featured = mockProducts.filter(p => p.has_fixed_price && p.is_active).slice(0, 4)
+type Props = {
+  featuredProducts: Product[]
+  categories: Category[]
+}
 
 const services = [
   {
@@ -35,7 +38,7 @@ const steps = [
   { icon: Truck, title: 'Pickup or delivery', description: 'Collect from our Accra shop or get it delivered to you.' },
 ]
 
-export function HomePageContent() {
+export function HomePageContent({ featuredProducts, categories }: Props) {
   return (
     <>
       <section className="bg-tscolors-navy px-4 py-16 text-white sm:py-24">
@@ -109,8 +112,8 @@ export function HomePageContent() {
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {featured.map(product => (
-              <ProductCard key={product.id} product={product} categories={mockCategories} />
+            {featuredProducts.map(product => (
+              <ProductCard key={product.id} product={product} categories={categories} />
             ))}
           </div>
         </div>

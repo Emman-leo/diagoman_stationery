@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -20,8 +20,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { OrderTable } from '@/components/admin/OrderTable'
-import { mockOrders } from '@/data/mock'
 import { ORDER_STATUSES } from '@/constants'
+import { createClient } from '@/lib/supabase/client'
+import { mapOrder } from '@/lib/supabase/mappers'
 import {
   formatCurrency,
   formatDateTime,
@@ -30,13 +31,28 @@ import {
 import { Order, OrderStatus } from '@/types'
 
 export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selected, setSelected] = useState<Order | null>(null)
   const [statusUpdate, setStatusUpdate] = useState<OrderStatus | ''>('')
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('orders')
+      .select('*, items:order_items(*)')
+      .order('created_at', { ascending: false })
+    setOrders((data ?? []).map(row => mapOrder(row as Record<string, unknown>)))
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   const filtered = useMemo(() => {
-    return mockOrders.filter(o => {
+    return orders.filter(o => {
       if (statusFilter !== 'all' && o.status !== statusFilter) return false
       if (search.trim()) {
         const q = search.toLowerCase()
@@ -47,11 +63,27 @@ export default function AdminOrdersPage() {
       }
       return true
     })
-  }, [search, statusFilter])
+  }, [search, statusFilter, orders])
 
   const openOrder = (order: Order) => {
     setSelected(order)
     setStatusUpdate(order.status)
+  }
+
+  const handleStatusUpdate = async (orderId: string, status: OrderStatus) => {
+    const supabase = createClient()
+    await supabase.from('orders').update({ status }).eq('id', orderId)
+  }
+
+  const handleSave = async () => {
+    if (!selected || !statusUpdate) return
+    setSaving(true)
+    await handleStatusUpdate(selected.id, statusUpdate as OrderStatus)
+    await load()
+    setSelected(prev =>
+      prev ? { ...prev, status: statusUpdate as OrderStatus } : null
+    )
+    setSaving(false)
   }
 
   const displayStatus = selected
@@ -164,8 +196,12 @@ export default function AdminOrdersPage() {
                   </Select>
                 </div>
 
-                <Button className="w-full bg-tscolors-navy hover:bg-tscolors-navy-light">
-                  Save Changes
+                <Button
+                  className="w-full bg-tscolors-navy hover:bg-tscolors-navy-light"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </>

@@ -8,8 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { formatCurrency, getCategoryName } from '@/lib/utils'
 import { useCart } from '@/lib/hooks/useCart'
 
-const LOW_STOCK_THRESHOLD = 20
-
 type Props = {
   product: Product
   categories: Category[]
@@ -17,8 +15,9 @@ type Props = {
 
 export function ProductCard({ product, categories }: Props) {
   const { addItem } = useCart()
-  const categoryName = getCategoryName(product.category_id, categories)
-  const isLowStock = product.stock_quantity < LOW_STOCK_THRESHOLD
+  const categoryName = product.category?.name ?? getCategoryName(product.category_id, categories)
+  const lowStockThreshold = product.low_stock_threshold ?? 20
+  const isLowStock = product.stock_quantity < lowStockThreshold
   const isOutOfStock = product.stock_quantity === 0
 
   return (

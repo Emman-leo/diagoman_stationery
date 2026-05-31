@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -19,8 +19,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { mockStampRequests } from '@/data/mock'
 import { STAMP_REQUEST_STATUSES } from '@/constants'
+import { createClient } from '@/lib/supabase/client'
+import { mapStampRequest } from '@/lib/supabase/mappers'
 import {
   formatCurrency,
   formatDateTime,
@@ -30,20 +31,52 @@ import {
 import { StampRequest } from '@/types'
 
 export default function AdminStampsPage() {
+  const [requests, setRequests] = useState<StampRequest[]>([])
   const [statusFilter, setStatusFilter] = useState('all')
   const [selected, setSelected] = useState<StampRequest | null>(null)
   const [quotePrice, setQuotePrice] = useState('')
   const [quoteNotes, setQuoteNotes] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('stamp_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setRequests((data ?? []).map(row => mapStampRequest(row as Record<string, unknown>)))
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   const filtered = useMemo(() => {
-    if (statusFilter === 'all') return mockStampRequests
-    return mockStampRequests.filter(r => r.status === statusFilter)
-  }, [statusFilter])
+    if (statusFilter === 'all') return requests
+    return requests.filter(r => r.status === statusFilter)
+  }, [statusFilter, requests])
 
   const openRequest = (req: StampRequest) => {
     setSelected(req)
     setQuotePrice(req.quoted_price?.toString() ?? '')
     setQuoteNotes(req.admin_notes ?? '')
+  }
+
+  const handleSaveQuote = async (id: string, price: number, notes: string) => {
+    const supabase = createClient()
+    await supabase
+      .from('stamp_requests')
+      .update({ quoted_price: price, admin_notes: notes, status: 'quoted' })
+      .eq('id', id)
+  }
+
+  const handleSave = async () => {
+    if (!selected) return
+    setSaving(true)
+    await handleSaveQuote(selected.id, Number(quotePrice), quoteNotes)
+    await load()
+    setSelected(null)
+    setSaving(false)
   }
 
   return (
@@ -161,8 +194,12 @@ export default function AdminStampsPage() {
                       placeholder="Turnaround time, special instructions..."
                     />
                   </div>
-                  <Button className="w-full bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light">
-                    Save Quote
+                  <Button
+                    className="w-full bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save Quote'}
                   </Button>
                 </div>
               </div>

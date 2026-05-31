@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { mockOrders } from '@/data/mock'
 import { ORDER_STATUSES } from '@/constants'
+import { createClient } from '@/lib/supabase/client'
+import { mapOrder } from '@/lib/supabase/mappers'
 import {
   formatCurrency,
   formatDateTime,
@@ -26,8 +27,9 @@ export default function TrackPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [order, setOrder] = useState<Order | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [tracking, setTracking] = useState(false)
 
-  const handleTrack = (e: React.FormEvent) => {
+  const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs: Record<string, string> = {}
     if (!orderNumber.trim()) errs.orderNumber = 'Order number is required'
@@ -36,19 +38,26 @@ export default function TrackPage() {
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
-    const normalized = normalizePhone(phone)
-    const found = mockOrders.find(
-      o =>
-        o.order_number.toLowerCase() === orderNumber.trim().toLowerCase() &&
-        normalizePhone(o.customer_phone) === normalized
-    )
-    if (found) {
-      setOrder(found)
-      setNotFound(false)
-    } else {
+    setTracking(true)
+    const supabase = createClient()
+
+    const { data } = await supabase
+      .from('orders')
+      .select('*, items:order_items(*)')
+      .eq('order_number', orderNumber.trim().toUpperCase())
+      .eq('customer_phone', normalizePhone(phone))
+      .single()
+
+    setTracking(false)
+
+    if (!data) {
       setOrder(null)
       setNotFound(true)
+      return
     }
+
+    setOrder(mapOrder(data as Record<string, unknown>))
+    setNotFound(false)
   }
 
   const statusIndex = order
@@ -95,10 +104,11 @@ export default function TrackPage() {
             </div>
             <Button
               type="submit"
+              disabled={tracking}
               className="w-full bg-tscolors-navy hover:bg-tscolors-navy-light"
             >
               <Search className="mr-2 h-4 w-4" />
-              Track Order
+              {tracking ? 'Tracking...' : 'Track Order'}
             </Button>
           </form>
         </CardContent>
@@ -109,7 +119,7 @@ export default function TrackPage() {
           <CardContent className="p-6 text-center">
             <p className="font-medium text-amber-900">Order not found</p>
             <p className="mt-2 text-sm text-amber-800">
-              Please check your order number and phone number. Try ORD-2024-0001 with 0244123456 for demo.
+              Please check your order number and phone number and try again.
             </p>
           </CardContent>
         </Card>

@@ -3,15 +3,50 @@ import { StatCard } from '@/components/admin/StatCard'
 import { OrderTable } from '@/components/admin/OrderTable'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  mockOrders,
-  mockStampRequests,
-  mockPrintRequests,
-} from '@/data/mock'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { mapOrder, mapPrintRequest, mapStampRequest } from '@/lib/supabase/mappers'
 import { getStampStatusConfig, getPrintStatusConfig, cn } from '@/lib/utils'
 
-export default function AdminDashboardPage() {
-  const pendingOrders = mockOrders.filter(o => o.status === 'pending').length
+export default async function AdminDashboardPage() {
+  const supabase = await createServerSupabaseClient()
+
+  const [
+    { count: totalOrders },
+    { count: pendingOrders },
+    { count: stampRequests },
+    { count: printRequests },
+    { data: recentOrders },
+    { data: recentStampRequests },
+    { data: recentPrintRequests },
+  ] = await Promise.all([
+    supabase.from('orders').select('*', { count: 'exact', head: true }),
+    supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('stamp_requests').select('*', { count: 'exact', head: true }),
+    supabase.from('print_requests').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('orders')
+      .select('*, items:order_items(*)')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('stamp_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(2),
+    supabase
+      .from('print_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(2),
+  ])
+
+  const orders = (recentOrders ?? []).map(row => mapOrder(row as Record<string, unknown>))
+  const stampReqs = (recentStampRequests ?? []).map(row =>
+    mapStampRequest(row as Record<string, unknown>)
+  )
+  const printReqs = (recentPrintRequests ?? []).map(row =>
+    mapPrintRequest(row as Record<string, unknown>)
+  )
 
   return (
     <div>
@@ -19,15 +54,15 @@ export default function AdminDashboardPage() {
       <p className="mt-1 text-muted-foreground">Overview of your store activity</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={ShoppingBag} label="Total Orders" value={mockOrders.length} trend={{ value: '+2 this week', positive: true }} />
-        <StatCard icon={Clock} label="Pending Orders" value={pendingOrders} />
-        <StatCard icon={Stamp} label="Stamp Requests" value={mockStampRequests.length} />
-        <StatCard icon={Printer} label="Print Requests" value={mockPrintRequests.length} />
+        <StatCard icon={ShoppingBag} label="Total Orders" value={totalOrders ?? 0} trend={{ value: '+2 this week', positive: true }} />
+        <StatCard icon={Clock} label="Pending Orders" value={pendingOrders ?? 0} />
+        <StatCard icon={Stamp} label="Stamp Requests" value={stampRequests ?? 0} />
+        <StatCard icon={Printer} label="Print Requests" value={printRequests ?? 0} />
       </div>
 
       <div className="mt-10">
         <h2 className="mb-4 text-lg font-semibold text-tscolors-navy">Recent Orders</h2>
-        <OrderTable orders={mockOrders} compact />
+        <OrderTable orders={orders} compact />
       </div>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
@@ -37,7 +72,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {mockStampRequests.map(req => {
+              {stampReqs.map(req => {
                 const status = getStampStatusConfig(req.status)
                 return (
                   <div key={req.id} className="flex items-center justify-between border-b pb-3 last:border-0">
@@ -59,7 +94,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {mockPrintRequests.map(req => {
+              {printReqs.map(req => {
                 const status = getPrintStatusConfig(req.status)
                 return (
                   <div key={req.id} className="flex items-center justify-between border-b pb-3 last:border-0">

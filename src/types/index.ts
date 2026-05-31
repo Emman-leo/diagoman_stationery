@@ -14,6 +14,7 @@ export type Product = {
   description: string | null
   price: number
   stock_quantity: number
+  low_stock_threshold?: number
   image_url: string | null
   has_fixed_price: boolean
   is_active: boolean

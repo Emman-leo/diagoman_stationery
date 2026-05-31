@@ -17,7 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { STAMP_TYPES, STAMP_SIZES, STAMP_COLORS } from '@/constants'
-import { generateOrderNumber, isValidGhanaPhone } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { isValidGhanaPhone, normalizePhone } from '@/lib/utils'
 
 const STEPS = ['Stamp Details', 'Logo & Design', 'Contact Details']
 
@@ -34,6 +35,7 @@ export default function StampRequestPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [refNumber, setRefNumber] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const validateStep = () => {
     const e: Record<string, string> = {}
@@ -53,13 +55,40 @@ export default function StampRequestPage() {
     return Object.keys(e).length === 0
   }
 
-  const next = () => {
+  const next = async () => {
     if (!validateStep()) return
-    if (step < 2) setStep(step + 1)
-    else {
-      setRefNumber(generateOrderNumber('STM'))
-      setSubmitted(true)
+    if (step < 2) {
+      setStep(step + 1)
+      return
     }
+
+    setSubmitting(true)
+    setErrors({})
+
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('stamp_requests')
+      .insert({
+        customer_name: name.trim(),
+        customer_phone: normalizePhone(phone),
+        stamp_type: stampType,
+        stamp_text: stampText.trim(),
+        size,
+        ink_color: inkColor,
+        status: 'pending',
+      })
+      .select()
+      .single()
+
+    setSubmitting(false)
+
+    if (error || !data) {
+      setErrors({ submit: 'Failed to submit request. Please try again.' })
+      return
+    }
+
+    setRefNumber(data.order_number)
+    setSubmitted(true)
   }
 
   const back = () => {
@@ -227,12 +256,17 @@ export default function StampRequestPage() {
               <ChevronLeft className="mr-1 h-4 w-4" />
               Back
             </Button>
+            {errors.submit && (
+              <p className="text-sm text-destructive">{errors.submit}</p>
+            )}
+
             <Button
               type="button"
+              disabled={submitting}
               className="bg-tscolors-gold text-tscolors-navy hover:bg-tscolors-gold-light"
               onClick={next}
             >
-              {step === 2 ? 'Submit Request' : 'Next'}
+              {step === 2 ? (submitting ? 'Submitting...' : 'Submit Request') : 'Next'}
               {step < 2 && <ChevronRight className="ml-1 h-4 w-4" />}
             </Button>
           </div>

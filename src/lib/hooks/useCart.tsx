@@ -23,11 +23,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem('diagoman-cart')
     if (saved) {
-      try {
-        setItems(JSON.parse(saved))
-      } catch {
-        setItems([])
-      }
+      try { setItems(JSON.parse(saved)) } catch { setItems([]) }
     }
     setHydrated(true)
   }, [])
@@ -72,18 +68,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = items.reduce((sum, i) => sum + i.quantity, 0)
 
   return (
-    <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, subtotal, count, hydrated }}
-    >
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, subtotal, count, hydrated }}>
       {children}
     </CartContext.Provider>
   )
 }
 
 export function useCart() {
-  const context = useContext(CartContext)
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider')
-  }
-  return context
+  const ctx = useContext(CartContext)
+  if (!ctx) throw new Error('useCart must be used within CartProvider')
+  return ctx
 }

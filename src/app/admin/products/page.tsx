@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,11 +20,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { mockProducts, mockCategories } from '@/data/mock'
+import { createClient } from '@/lib/supabase/client'
+import { mapCategory, mapProduct } from '@/lib/supabase/mappers'
 import { formatCurrency, getCategoryName } from '@/lib/utils'
+import { Category, Product } from '@/types'
 
 export default function AdminProductsPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [addOpen, setAddOpen] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newCategoryId, setNewCategoryId] = useState('')
+  const [newPrice, setNewPrice] = useState('')
+  const [newStock, setNewStock] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    const supabase = createClient()
+    const [{ data: prods }, { data: cats }] = await Promise.all([
+      supabase
+        .from('products')
+        .select('*, category:categories(id, name, slug)')
+        .order('name'),
+      supabase.from('categories').select('*').order('name'),
+    ])
+    setProducts((prods ?? []).map(row => mapProduct(row as Record<string, unknown>)))
+    setCategories((cats ?? []).map(row => mapCategory(row as Record<string, unknown>)))
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const handleAddProduct = async () => {
+    if (!newName.trim() || !newCategoryId) return
+    setSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase.from('products').insert({
+      name: newName.trim(),
+      category_id: newCategoryId,
+      price: Number(newPrice) || 0,
+      stock_quantity: Number(newStock) || 0,
+      low_stock_threshold: 10,
+      has_fixed_price: true,
+      is_active: true,
+    })
+    setSaving(false)
+    if (!error) {
+      setAddOpen(false)
+      setNewName('')
+      setNewCategoryId('')
+      setNewPrice('')
+      setNewStock('')
+      load()
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    const supabase = createClient()
+    await supabase.from('products').delete().eq('id', id)
+    load()
+  }
 
   return (
     <div>
@@ -56,7 +112,7 @@ export default function AdminProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {mockProducts.map(product => (
+            {products.map(product => (
               <tr key={product.id} className="border-t">
                 <td className="px-4 py-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded bg-tscolors-cloud">
@@ -65,7 +121,7 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="px-4 py-3 font-medium">{product.name}</td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {getCategoryName(product.category_id, mockCategories)}
+                  {product.category?.name ?? getCategoryName(product.category_id, categories)}
                 </td>
                 <td className="px-4 py-3">
                   {product.has_fixed_price
@@ -83,7 +139,13 @@ export default function AdminProductsPage() {
                     <Button variant="ghost" size="icon-xs" aria-label="Edit">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon-xs" className="text-destructive" aria-label="Delete">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-destructive"
+                      aria-label="Delete"
+                      onClick={() => handleDelete(product.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -102,16 +164,21 @@ export default function AdminProductsPage() {
           <div className="space-y-4 py-2">
             <div>
               <Label>Product name</Label>
-              <Input className="mt-1" placeholder="Product name" />
+              <Input
+                className="mt-1"
+                placeholder="Product name"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+              />
             </div>
             <div>
               <Label>Category</Label>
-              <Select>
+              <Select value={newCategoryId} onValueChange={v => setNewCategoryId(v ?? '')}>
                 <SelectTrigger className="mt-1 w-full">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockCategories.map(c => (
+                  {categories.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -120,17 +187,35 @@ export default function AdminProductsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Price (GH₵)</Label>
-                <Input className="mt-1" type="number" placeholder="0.00" />
+                <Input
+                  className="mt-1"
+                  type="number"
+                  placeholder="0.00"
+                  value={newPrice}
+                  onChange={e => setNewPrice(e.target.value)}
+                />
               </div>
               <div>
                 <Label>Stock quantity</Label>
-                <Input className="mt-1" type="number" placeholder="0" />
+                <Input
+                  className="mt-1"
+                  type="number"
+                  placeholder="0"
+                  value={newStock}
+                  onChange={e => setNewStock(e.target.value)}
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button className="bg-tscolors-navy hover:bg-tscolors-navy-light">Save Product</Button>
+            <Button
+              className="bg-tscolors-navy hover:bg-tscolors-navy-light"
+              onClick={handleAddProduct}
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save Product'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
