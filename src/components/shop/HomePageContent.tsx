@@ -41,34 +41,42 @@ const steps = [
 export function HomePageContent({ featuredProducts, categories }: Props) {
   return (
     <>
-      <section className="bg-tscolors-navy px-4 py-16 text-white sm:py-24">
-        <div className="mx-auto max-w-7xl">
+      {/* Hero */}
+      <section
+        className="relative min-h-[580px] flex items-center bg-tscolors-navy"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay so text is always readable */}
+        <div className="absolute inset-0 bg-tscolors-navy/80" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="max-w-2xl">
-            <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+            <span className="inline-block text-tscolors-gold text-sm font-medium mb-4 tracking-widest uppercase">
+              Accra's Stationery & Stamp Specialists
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
               Quality you can{' '}
               <span className="text-tscolors-gold">stamp on</span>
             </h1>
-            <p className="mt-6 text-lg text-white/80">
-              Diagoman is Accra&apos;s trusted stationery, custom stamp and printing specialists.
+            <p className="text-white/80 text-lg mb-8 leading-relaxed">
+              Diagoman is Accra's trusted stationery, custom stamp and printing specialists.
               From everyday office supplies to bespoke stamps — we deliver quality you can count on.
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/products"
-                className={cn(
-                  buttonVariants({ size: 'lg' }),
-                  'bg-tscolors-gold font-semibold text-tscolors-navy hover:bg-tscolors-gold-light'
-                )}
+                className="inline-flex items-center justify-center gap-2 bg-tscolors-gold text-tscolors-navy font-semibold px-6 py-3 rounded-lg hover:bg-tscolors-gold-light transition-colors"
               >
                 Browse Products
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/stamp-request"
-                className={cn(
-                  buttonVariants({ size: 'lg', variant: 'outline' }),
-                  'border-white/30 bg-transparent text-white hover:bg-white/10'
-                )}
+                className="inline-flex items-center justify-center gap-2 border-2 border-white/40 text-white font-semibold px-6 py-3 rounded-lg hover:bg-white/10 transition-colors"
               >
                 Order Custom Stamp
               </Link>
