@@ -12,7 +12,7 @@ export function Footer() {
               <span className="text-lg font-bold">Diagoman</span>
             </div>
             <p className="text-sm leading-relaxed text-white/70">
-              Your trusted stationery, custom stamp and printing specialists in Accra, Ghana.
+              Your trusted stationery and custom stamp specialists in Accra, Ghana.
               Quality products and professional service since day one.
             </p>
           </div>
@@ -22,9 +22,9 @@ export function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-2 text-sm text-white/70">
-              <li><Link href="/products" className="hover:text-tscolors-gold">Shop Products</Link></li>
+              <li><Link href="/" className="hover:text-tscolors-gold">Home</Link></li>
+              <li><Link href="/products" className="hover:text-tscolors-gold">Products</Link></li>
               <li><Link href="/stamp-request" className="hover:text-tscolors-gold">Custom Stamps</Link></li>
-              <li><Link href="/print-request" className="hover:text-tscolors-gold">Printing Services</Link></li>
               <li><Link href="/track" className="hover:text-tscolors-gold">Track Order</Link></li>
               <li><Link href="/order" className="hover:text-tscolors-gold">Checkout</Link></li>
             </ul>
@@ -52,7 +52,15 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-tscolors-navy py-4 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} Diagoman Stationery. All rights reserved.
+        <p>© {new Date().getFullYear()} Diagoman Stationery. All rights reserved.</p>
+        <p className="mt-2">
+          <Link
+            href="/admin/login"
+            className="text-white/40 transition-colors hover:text-tscolors-gold"
+          >
+            Staff login
+          </Link>
+        </p>
       </div>
     </footer>
   )

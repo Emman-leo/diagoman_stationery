@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Stamp, Printer, Package, ShoppingCart, Truck, CheckCircle } from 'lucide-react'
+import { ArrowRight, Stamp, Package, ShoppingCart, Truck, CheckCircle } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,12 +17,6 @@ const services = [
     title: 'Custom Stamps',
     description: 'Self-inking, date, company and signature stamps made to your specifications.',
     href: '/stamp-request',
-  },
-  {
-    icon: Printer,
-    title: 'Printing Services',
-    description: 'Business cards, flyers, banners, letterheads and more — professional quality.',
-    href: '/print-request',
   },
   {
     icon: Package,
@@ -63,7 +57,7 @@ export function HomePageContent({ featuredProducts, categories }: Props) {
               <span className="text-tscolors-gold">stamp on</span>
             </h1>
             <p className="text-white/80 text-lg mb-8 leading-relaxed">
-              Diagoman is Accra's trusted stationery, custom stamp and printing specialists.
+              Diagoman is Accra's trusted stationery and custom stamp specialists.
               From everyday office supplies to bespoke stamps — we deliver quality you can count on.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -87,7 +81,7 @@ export function HomePageContent({ featuredProducts, categories }: Props) {
 
       <section className="mx-auto max-w-7xl px-4 py-12">
         <h2 className="mb-8 text-center text-2xl font-bold text-tscolors-navy">Our Services</h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
           {services.map(s => {
             const Icon = s.icon
             return (

@@ -10,9 +10,9 @@ import { CartDrawer } from '@/components/shop/CartDrawer'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
+  { href: '/', label: 'Home' },
   { href: '/products', label: 'Products' },
   { href: '/stamp-request', label: 'Custom Stamps' },
-  { href: '/print-request', label: 'Printing' },
   { href: '/track', label: 'Track Order' },
 ]
 
