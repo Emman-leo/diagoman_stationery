@@ -62,6 +62,15 @@ export const PRINT_FINISHES = [
 
 export const DELIVERY_FEE = 15.00
 
+/** Local Ghana format (10 digits, leading 0) */
+export const BUSINESS_PHONE = '0549232088'
+export const BUSINESS_PHONE_DISPLAY = '054 923 2088'
+export const BUSINESS_PHONE_TEL = 'tel:+233549232088'
+/** Opens WhatsApp chat (international format without +) */
+export const WHATSAPP_URL = 'https://wa.me/233549232088'
+export const WHATSAPP_MESSAGE =
+  'https://wa.me/233549232088?text=Hello%20Diagoman%2C%20I%20would%20like%20to%20enquire%20about...'
+
 export const STAMP_REQUEST_STATUSES = [
   { value: 'pending', label: 'Pending', color: 'bg-amber-50 text-amber-800' },
   { value: 'quoted', label: 'Quoted', color: 'bg-blue-50 text-blue-800' },

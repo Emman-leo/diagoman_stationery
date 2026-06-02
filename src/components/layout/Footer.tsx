@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { Stamp, Phone, MapPin, Clock } from 'lucide-react'
+import { Stamp, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
+import {
+  BUSINESS_PHONE_DISPLAY,
+  BUSINESS_PHONE_TEL,
+  WHATSAPP_URL,
+} from '@/constants'
 
 export function Footer() {
   return (
@@ -37,7 +42,20 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-white/70">
               <li className="flex items-start gap-2">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
-                <span>+233 24 000 0000</span>
+                <a href={BUSINESS_PHONE_TEL} className="hover:text-tscolors-gold">
+                  {BUSINESS_PHONE_DISPLAY}
+                </a>
+              </li>
+              <li className="flex items-start gap-2">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-tscolors-gold"
+                >
+                  Chat on WhatsApp
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
