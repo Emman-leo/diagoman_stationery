@@ -174,7 +174,7 @@ export default function AdminStampsPage() {
                 <div className="space-y-3">
                   <p className="font-medium text-tscolors-navy">Add Quote</p>
                   <div>
-                    <Label htmlFor="quotePrice">Price (GH₵)</Label>
+                    <Label htmlFor="quotePrice">Price ($)</Label>
                     <Input
                       id="quotePrice"
                       type="number"

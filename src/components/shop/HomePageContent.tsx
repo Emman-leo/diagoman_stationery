@@ -50,14 +50,14 @@ export function HomePageContent({ featuredProducts, categories }: Props) {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="max-w-2xl">
             <span className="inline-block text-tscolors-gold text-sm font-medium mb-4 tracking-widest uppercase">
-              Accra's Stationery & Stamp Specialists
+              Accra's Stationery & Stamp Specialist
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
               Quality you can{' '}
               <span className="text-tscolors-gold">stamp on</span>
             </h1>
             <p className="text-white/80 text-lg mb-8 leading-relaxed">
-              Diagoman is Accra's trusted stationery and custom stamp specialists.
+              Diagoman is Accra's trusted stationery and custom stamp specialist.
               From everyday office supplies to bespoke stamps — we deliver quality you can count on.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
