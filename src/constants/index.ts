@@ -66,6 +66,11 @@ export const DELIVERY_FEE = 15.00
 export const BUSINESS_PHONE = '0549232088'
 export const BUSINESS_PHONE_DISPLAY = '054 923 2088'
 export const BUSINESS_PHONE_TEL = 'tel:+233549232088'
+
+export const BUSINESS_PHONE_2 = '0536669582'
+export const BUSINESS_PHONE_2_DISPLAY = '0536669582'
+export const BUSINESS_PHONE_2_TEL = 'tel:+233536669582'
+
 /** Opens WhatsApp chat (international format without +) */
 export const WHATSAPP_URL = 'https://wa.me/233549232088'
 export const WHATSAPP_MESSAGE =

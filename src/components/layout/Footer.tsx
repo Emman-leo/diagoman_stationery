@@ -3,6 +3,8 @@ import { Stamp, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
 import {
   BUSINESS_PHONE_DISPLAY,
   BUSINESS_PHONE_TEL,
+  BUSINESS_PHONE_2_DISPLAY,
+  BUSINESS_PHONE_2_TEL,
   WHATSAPP_URL,
 } from '@/constants'
 
@@ -42,9 +44,14 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-white/70">
               <li className="flex items-start gap-2">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
-                <a href={BUSINESS_PHONE_TEL} className="hover:text-tscolors-gold">
-                  {BUSINESS_PHONE_DISPLAY}
-                </a>
+                <div className="flex flex-col gap-1">
+                  <a href={BUSINESS_PHONE_TEL} className="hover:text-tscolors-gold">
+                    {BUSINESS_PHONE_DISPLAY}
+                  </a>
+                  <a href={BUSINESS_PHONE_2_TEL} className="hover:text-tscolors-gold">
+                    {BUSINESS_PHONE_2_DISPLAY}
+                  </a>
+                </div>
               </li>
               <li className="flex items-start gap-2">
                 <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
@@ -59,7 +66,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
-                <span>Osu, Accra, Ghana</span>
+                <span>Korlebu, Accra, Ghana</span>
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
