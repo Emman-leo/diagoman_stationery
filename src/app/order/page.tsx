@@ -107,6 +107,14 @@ export default function OrderPage() {
       })
     }
 
+    void fetch('/api/notify-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: order.id }),
+    }).catch(() => {
+      // Order is saved; email failure should not block the customer
+    })
+
     clearCart()
     setOrderNumber(order.order_number)
     setSubmitted(true)
