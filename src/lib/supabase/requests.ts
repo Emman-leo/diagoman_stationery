@@ -7,6 +7,7 @@ type StampPayload = {
   stamp_text: string
   size: string
   ink_color: string
+  logo_url?: string | null
 }
 
 type PrintPayload = {
@@ -16,6 +17,7 @@ type PrintPayload = {
   quantity: number
   size: string
   finish: string
+  artwork_url?: string | null
 }
 
 export async function submitStampRequest(payload: StampPayload) {
@@ -44,6 +46,7 @@ export async function submitStampRequest(payload: StampPayload) {
       stamp_text: payload.stamp_text,
       size: payload.size,
       ink_color: payload.ink_color,
+      logo_url: payload.logo_url,
       status: 'pending',
     })
     .select('*')
@@ -85,6 +88,7 @@ export async function submitPrintRequest(payload: PrintPayload) {
       quantity: payload.quantity,
       size: payload.size,
       finish: payload.finish,
+      artwork_url: payload.artwork_url,
       status: 'pending',
     })
     .select('*')

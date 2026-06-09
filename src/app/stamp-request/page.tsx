@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 import { STAMP_TYPES, STAMP_SIZES, STAMP_COLORS } from '@/constants'
 import { submitStampRequest } from '@/lib/supabase/requests'
+import { uploadStampLogo } from '@/lib/supabase/storage'
 import { isValidGhanaPhone, normalizePhone } from '@/lib/utils'
 
 const STEPS = ['Stamp Details', 'Logo & Design', 'Contact Details']
@@ -36,6 +37,8 @@ export default function StampRequestPage() {
   const [submitted, setSubmitted] = useState(false)
   const [refNumber, setRefNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   const validateStep = () => {
     const e: Record<string, string> = {}
@@ -65,6 +68,18 @@ export default function StampRequestPage() {
     setSubmitting(true)
     setErrors({})
 
+    let logoUrl: string | null = null
+    if (logoFile) {
+      setUploading(true)
+      logoUrl = await uploadStampLogo(logoFile)
+      setUploading(false)
+      if (!logoUrl) {
+        setErrors({ submit: 'Logo upload failed. Please try again.' })
+        setSubmitting(false)
+        return
+      }
+    }
+
     const { orderNumber, error } = await submitStampRequest({
       customer_name: name.trim(),
       customer_phone: normalizePhone(phone),
@@ -72,6 +87,7 @@ export default function StampRequestPage() {
       stamp_text: stampText.trim(),
       size,
       ink_color: inkColor,
+      logo_url: logoUrl,
     })
 
     setSubmitting(false)
@@ -203,13 +219,14 @@ export default function StampRequestPage() {
               <div className="rounded-lg border-2 border-dashed border-tscolors-navy/20 bg-tscolors-cloud p-8 text-center">
                 <Upload className="mx-auto h-10 w-10 text-tscolors-navy/40" />
                 <p className="mt-4 font-medium text-tscolors-navy">Upload logo or design</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Drag and drop or click to browse (PNG, JPG, PDF — max 5MB)
-                </p>
-                <Button type="button" variant="outline" className="mt-4" disabled>
-                  Choose File
-                </Button>
-                <p className="mt-2 text-xs text-muted-foreground">File upload coming soon</p>
+                <p className="mt-2 text-sm text-muted-foreground">PNG, JPG, PDF — max 5MB</p>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,application/pdf"
+                  onChange={e => setLogoFile(e.target.files?.[0] ?? null)}
+                  className="mt-4 block w-full text-sm text-muted-foreground"
+                />
+                {logoFile && <p className="mt-2 text-xs text-green-700">Selected: {logoFile.name}</p>}
               </div>
               <div>
                 <Label htmlFor="designNotes">Additional notes</Label>

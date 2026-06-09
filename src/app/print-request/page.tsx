@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 import { PRINT_SERVICES, PRINT_SIZES, PRINT_FINISHES } from '@/constants'
 import { submitPrintRequest } from '@/lib/supabase/requests'
+import { uploadPrintArtwork } from '@/lib/supabase/storage'
 import { isValidGhanaPhone, normalizePhone } from '@/lib/utils'
 
 const STEPS = ['Service Details', 'Artwork', 'Contact Details']
@@ -36,6 +37,8 @@ export default function PrintRequestPage() {
   const [submitted, setSubmitted] = useState(false)
   const [refNumber, setRefNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [artworkFile, setArtworkFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   const validateStep = () => {
     const e: Record<string, string> = {}
@@ -65,6 +68,18 @@ export default function PrintRequestPage() {
     setSubmitting(true)
     setErrors({})
 
+    let artworkUrl: string | null = null
+    if (artworkFile) {
+      setUploading(true)
+      artworkUrl = await uploadPrintArtwork(artworkFile)
+      setUploading(false)
+      if (!artworkUrl) {
+        setErrors({ submit: 'Artwork upload failed. Please try again.' })
+        setSubmitting(false)
+        return
+      }
+    }
+
     const { orderNumber, error } = await submitPrintRequest({
       customer_name: name.trim(),
       customer_phone: normalizePhone(phone),
@@ -72,6 +87,7 @@ export default function PrintRequestPage() {
       quantity: Number(quantity),
       size,
       finish,
+      artwork_url: artworkUrl,
     })
 
     setSubmitting(false)
@@ -203,13 +219,14 @@ export default function PrintRequestPage() {
               <div className="rounded-lg border-2 border-dashed border-tscolors-navy/20 bg-tscolors-cloud p-8 text-center">
                 <Upload className="mx-auto h-10 w-10 text-tscolors-navy/40" />
                 <p className="mt-4 font-medium text-tscolors-navy">Upload artwork</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Drag and drop or click to browse (PNG, JPG, PDF, AI — max 10MB)
-                </p>
-                <Button type="button" variant="outline" className="mt-4" disabled>
-                  Choose File
-                </Button>
-                <p className="mt-2 text-xs text-muted-foreground">File upload coming soon</p>
+                <p className="mt-2 text-sm text-muted-foreground">PNG, JPG, PDF, AI — max 10MB</p>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,application/pdf,.ai"
+                  onChange={e => setArtworkFile(e.target.files?.[0] ?? null)}
+                  className="mt-4 block w-full text-sm text-muted-foreground"
+                />
+                {artworkFile && <p className="mt-2 text-xs text-green-700">Selected: {artworkFile.name}</p>}
               </div>
               <div>
                 <Label htmlFor="artworkNotes">Notes</Label>

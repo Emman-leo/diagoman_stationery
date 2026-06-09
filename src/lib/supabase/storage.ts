@@ -36,3 +36,23 @@ export async function deleteProductImage(imageUrl: string): Promise<void> {
   const filePath = pathParts[1]
   await supabase.storage.from('product-images').remove([filePath])
 }
+
+export async function uploadStampLogo(file: File): Promise<string | null> {
+  const supabase = createClient()
+  const fileExt = file.name.split('.').pop()
+  const filePath = `logos/${crypto.randomUUID()}.${fileExt}`
+  const { error } = await supabase.storage.from('stamp-logos').upload(filePath, file, { cacheControl: '3600', upsert: false })
+  if (error) return null
+  const { data } = supabase.storage.from('stamp-logos').getPublicUrl(filePath)
+  return data.publicUrl
+}
+
+export async function uploadPrintArtwork(file: File): Promise<string | null> {
+  const supabase = createClient()
+  const fileExt = file.name.split('.').pop()
+  const filePath = `artwork/${crypto.randomUUID()}.${fileExt}`
+  const { error } = await supabase.storage.from('print-artwork').upload(filePath, file, { cacheControl: '3600', upsert: false })
+  if (error) return null
+  // print-artwork is private — return path not public URL
+  return filePath
+}
