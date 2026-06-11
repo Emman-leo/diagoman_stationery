@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   Package,
   Stamp,
-  Printer,
   LogOut,
   Menu,
   X,
@@ -23,7 +22,6 @@ const links = [
   { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/stamps', label: 'Stamp Requests', icon: Stamp },
-  { href: '/admin/printing', label: 'Print Requests', icon: Printer },
 ]
 
 export function AdminSidebar() {
