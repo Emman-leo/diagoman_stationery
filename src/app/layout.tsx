@@ -7,25 +7,39 @@ import { CartProvider } from '@/lib/hooks/useCart'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://diagoman-stationery.vercel.app'),
+  metadataBase: new URL('https://diagoman.org'),
   title: {
-    default: 'Diagoman — Stationery & Stamp Specialists, Accra',
-    template: '%s | Diagoman',
+    default: 'Diagoman — Custom Stamps & Stationery, Accra Ghana',
+    template: '%s | Diagoman Accra',
   },
-  description: 'Quality stationery, custom stamps and printing services in Accra, Ghana. Order online with delivery or pickup.',
-  keywords: ['stationery Accra', 'custom stamps Ghana', 'printing services Accra', 'office supplies Ghana', 'Diagoman'],
+  description: 'Diagoman is Accra\'s trusted custom stamp maker and stationery supplier. Self-inking stamps, company stamps, date stamps and office stationery. Order online with delivery across Accra, Ghana.',
+  keywords: [
+    'custom stamps Accra',
+    'rubber stamp maker Ghana',
+    'self inking stamps Accra',
+    'company stamp Ghana',
+    'date stamp Ghana',
+    'stationery shop Accra',
+    'office supplies Ghana',
+    'stamp maker Korlebu',
+    'Diagoman',
+    'stamps Ghana',
+  ],
   openGraph: {
-    title: 'Diagoman — Stationery & Stamp Specialists',
-    description: 'Quality stationery, custom stamps and printing in Accra, Ghana.',
-    url: 'https://diagoman-stationery.vercel.app',
+    title: 'Diagoman — Custom Stamps & Stationery, Accra',
+    description: 'Accra\'s trusted custom stamp maker and stationery supplier. Self-inking stamps, company stamps, date stamps and office supplies delivered across Ghana.',
+    url: 'https://diagoman.org',
     siteName: 'Diagoman',
     locale: 'en_GH',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Diagoman — Stationery & Stamp Specialists',
-    description: 'Quality stationery, custom stamps and printing in Accra, Ghana.',
+    title: 'Diagoman — Custom Stamps & Stationery, Accra',
+    description: 'Accra\'s trusted custom stamp maker. Self-inking stamps, company stamps and office stationery delivered across Ghana.',
+  },
+  alternates: {
+    canonical: 'https://diagoman.org',
   },
 }
 

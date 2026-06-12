@@ -66,7 +66,10 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
-                <span>Korlebu, Accra, Ghana</span>
+                <address className="not-italic text-white/70">
+                  Korlebu, Accra<br />
+                  Greater Accra, Ghana
+                </address>
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />

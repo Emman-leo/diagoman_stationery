@@ -93,7 +93,7 @@ export function buildOrderNotificationHtml(order: OrderEmailPayload): string {
 }
 
 function adminOrdersUrl(): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://diagoman-stationery.vercel.app'
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://diagoman.org'
   return `${base.replace(/\/$/, '')}/admin/orders`
 }
 
