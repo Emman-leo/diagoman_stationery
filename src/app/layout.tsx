@@ -41,6 +41,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://diagoman.org',
   },
+  other: {
+    'sameAs': 'https://www.tiktok.com/@diagomanstationar6',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { Stamp, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
+import { Stamp, Phone, MapPin, Clock, MessageCircle, Music } from 'lucide-react'
 import {
   BUSINESS_PHONE_DISPLAY,
   BUSINESS_PHONE_TEL,
   BUSINESS_PHONE_2_DISPLAY,
   BUSINESS_PHONE_2_TEL,
   WHATSAPP_URL,
+  TIKTOK_URL,
 } from '@/constants'
 
 export function Footer() {
@@ -62,6 +63,17 @@ export function Footer() {
                   className="hover:text-tscolors-gold"
                 >
                   Chat on WhatsApp
+                </a>
+              </li>
+              <li className="flex items-start gap-2">
+                <Music className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
+                <a
+                  href={TIKTOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-tscolors-gold"
+                >
+                  Follow on TikTok
                 </a>
               </li>
               <li className="flex items-start gap-2">
