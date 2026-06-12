@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Stamp, Phone, MapPin, Clock, MessageCircle, Music } from 'lucide-react'
+import { Stamp, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
 import {
   BUSINESS_PHONE_DISPLAY,
   BUSINESS_PHONE_TEL,
@@ -8,6 +8,24 @@ import {
   WHATSAPP_URL,
   TIKTOK_URL,
 } from '@/constants'
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M15.65 3.46c.25.35.51.69.78 1.02a9.18 9.18 0 0 1-2.43 4.2 9.17 9.17 0 0 1-4.2 2.43c-.33.27-.67.53-1.02.78" />
+    <path d="M9.14 17.66c1.36 1.36 3.57 1.36 4.93 0s1.36-3.57 0-4.93" />
+    <path d="M14.07 11.14v6.43a2.36 2.36 0 0 1-2.36 2.36H6.58A2.36 2.36 0 0 1 4.22 17.6V6.58A2.36 2.36 0 0 1 6.58 4.22h6.43" />
+    <path d="M15.03 3.16v6.43a2.36 2.36 0 0 0 2.36 2.36h4.42" />
+    <path d="M18.45 13.54v4.27a2.36 2.36 0 0 1-2.36 2.36H11.82" />
+  </svg>
+)
 
 export function Footer() {
   return (
@@ -66,7 +84,7 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex items-start gap-2">
-                <Music className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
+                <TikTokIcon className="mt-0.5 h-4 w-4 shrink-0 text-tscolors-gold" />
                 <a
                   href={TIKTOK_URL}
                   target="_blank"
