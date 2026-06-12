@@ -1,8 +1,12 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
 import './globals.css'
 import { CartProvider } from '@/lib/hooks/useCart'
+
+config.autoAddCss = false
 
 const inter = Inter({ subsets: ['latin'] })
 
