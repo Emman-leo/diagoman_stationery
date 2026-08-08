@@ -59,6 +59,8 @@ export function HomePageContent({ featuredProducts, categories }: Props) {
             <p className="text-white/80 text-lg mb-8 leading-relaxed">
               Diagoman is Accra's trusted stationery and custom stamp specialist.
               From everyday office supplies to bespoke stamps — we deliver quality you can count on.
+We have a variety of stamps available in different designs. You can purchase them in bulk at wholesale prices.
+Bulk orders welcome
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
